@@ -1,0 +1,7 @@
+syntax: glob
+*.bak
+stm32cdc110 THUMB Debug\*
+stm32cdc110 THUMB Release\*
+stm32cdc THUMB Debug\*
+stm32cdc THUMB Release\*
+*.hzs
