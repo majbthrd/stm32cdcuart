@@ -1,7 +1,7 @@
 DMA-accelerated multi-UART USB CDC for STM32F072 microcontroller
 ================================================================
 
-This USB CDC ACM implementation was written out of frustration with the example [example USB CDC class to UART bridge implementation](http://www.st.com/web/en/catalog/tools/PF260612) provided by ST Micro.
+This USB CDC ACM implementation was written out of frustration with the [example USB CDC class to UART bridge implementation](http://www.st.com/web/en/catalog/tools/PF260612) provided by ST Micro.
 
 This code re-writes the USB CDC implementation to hopefully overcome these limitations, but tries to not otherwise 'reinvent the wheel' where ST's existing code (V1.2.1) is serviceable as-is.
 
