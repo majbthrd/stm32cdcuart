@@ -77,21 +77,6 @@ static const struct device_descriptor hUSBDDeviceDesc =
   USBD_MAX_NUM_CONFIGURATION  /* bNumConfigurations */
 };
 
-/* USB device Configuration Descriptor */
-
-struct cdc_interface
-{
-  struct interface_descriptor             ctl_interface;
-  struct cdc_functional_descriptor_header cdc_acm_header;
-  struct cdc_cm_functional_descriptor     cdc_cm;
-  struct cdc_acm_functional_descriptor    cdc_acm;
-  struct cdc_union_functional_descriptor  cdc_union;
-  struct endpoint_descriptor              ctl_ep;
-  struct interface_descriptor             dat_interface;
-  struct endpoint_descriptor              ep_in;
-  struct endpoint_descriptor              ep_out;
-};
-
 /* bespoke struct for this device; struct members are added and removed as needed */
 struct configuration_1
 {

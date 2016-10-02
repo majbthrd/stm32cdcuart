@@ -27,6 +27,12 @@
 
 #include <stdint.h>
 
+/*
+IMPORTANT note to self:
+all of these helper structs must *solely* use uint8_t-derived members
+GCC doesn't seem to support packed structs any more, so to only way to avoid padding is to be uint8_t-only
+*/
+
 struct usb_uint16
 {
   uint8_t lo;
@@ -120,6 +126,18 @@ struct cdc_union_functional_descriptor
   uint8_t bDescriptorSubtype;
   uint8_t bMasterInterface;
   uint8_t bSlaveInterface0;
+};
+
+struct cdc_enet_functional_descriptor
+{
+  uint8_t bFunctionLength;
+  uint8_t bDescriptorType;
+  uint8_t bDescriptorSubtype;
+  uint8_t iMACAddress;
+  uint8_t bmEthernetStatistics[4];
+  struct usb_uint16 wMaxSegmentSize;
+  struct usb_uint16 wMCFilters;
+  uint8_t bNumberPowerFilters;
 };
 
 #endif /* __USB_MAGIC_H */

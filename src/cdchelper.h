@@ -28,6 +28,19 @@
 #include <stdint.h>
 #include "usbhelper.h"
 
+struct cdc_interface
+{
+  struct interface_descriptor             ctl_interface;
+  struct cdc_functional_descriptor_header cdc_acm_header;
+  struct cdc_cm_functional_descriptor     cdc_cm;
+  struct cdc_acm_functional_descriptor    cdc_acm;
+  struct cdc_union_functional_descriptor  cdc_union;
+  struct endpoint_descriptor              ctl_ep;
+  struct interface_descriptor             dat_interface;
+  struct endpoint_descriptor              ep_in;
+  struct endpoint_descriptor              ep_out;
+};
+
 /* macro to help generate CDC ACM USB descriptors */
 
 #define CDC_DESCRIPTOR(COMMAND_ITF, DATA_ITF, COMMAND_EP, DATAOUT_EP, DATAIN_EP) \
