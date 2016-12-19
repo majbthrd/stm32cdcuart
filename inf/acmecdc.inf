@@ -1,0 +1,82 @@
+; Modified Windows USB CDC Abstract Control Model Serial Driver Setup File
+
+[Version] 
+Signature="$Windows NT$" 
+Class=Ports
+ClassGuid={4D36E978-E325-11CE-BFC1-08002BE10318} 
+Provider=%MFGNAME% 
+CatalogFile=%MFGFILENAME%.cat
+DriverVer=12/06/2012,5.1.2600.7
+
+[Manufacturer] 
+%MFGNAME%=DeviceList,NTamd64
+
+
+[DeviceList]
+%DESCRIPTION%=DriverInstall, USB\VID_0483&PID_5740&MI_00
+%DESCRIPTION%=DriverInstall, USB\VID_0483&PID_5740&MI_02
+%DESCRIPTION%=DriverInstall, USB\VID_0483&PID_5740&MI_04
+
+[DeviceList.NTamd64] 
+%DESCRIPTION%=DriverInstall, USB\VID_0483&PID_5740&MI_00
+%DESCRIPTION%=DriverInstall, USB\VID_0483&PID_5740&MI_02
+%DESCRIPTION%=DriverInstall, USB\VID_0483&PID_5740&MI_04
+
+;------------------------------------------------------------------------------
+; 32-bit Windows
+;------------------------------------------------------------------------------
+[DriverInstall.nt] 
+include=mdmcpq.inf
+CopyFiles=FakeModemCopyFileSection 
+AddReg=DriverInstall.nt.AddReg 
+
+[DriverInstall.nt.AddReg] 
+HKR,,DevLoader,,*ntkern 
+HKR,,NTMPDriver,,%DRIVERFILENAME%.sys 
+HKR,,EnumPropPages32,,"MsPorts.dll,SerialPortPropPageProvider" 
+
+[DriverInstall.NT.Services]
+AddService=usbser, 0x00000002, Service_Inst 
+
+[Service_Inst] 
+DisplayName = %Serial.SvcDesc% 
+ServiceType = 1 ; SERVICE_KERNEL_DRIVER 
+StartType = 3 ; SERVICE_DEMAND_START 
+ErrorControl = 1 ; SERVICE_ERROR_NORMAL 
+ServiceBinary = %12%\usbser.sys 
+LoadOrderGroup = Base 
+
+;------------------------------------------------------------------------------
+; 64-bit Windows
+;------------------------------------------------------------------------------
+[DriverInstall.NTamd64]
+include=mdmcpq.inf
+CopyFiles=FakeModemCopyFileSection
+AddReg=DriverInstall.NTamd64.AddReg 
+
+[DriverInstall.NTamd64.AddReg] 
+HKR,,DevLoader,,*ntkern 
+HKR,,NTMPDriver,,%DRIVERFILENAME%.sys 
+HKR,,EnumPropPages32,,"MsPorts.dll,SerialPortPropPageProvider" 
+
+[DriverInstall.NTamd64.Services] 
+AddService=usbser, 0x00000002, DriverService.NTamd64
+
+[DriverService.NTamd64]
+DisplayName=%Serial.SvcDesc%
+ServiceType=1
+StartType=3
+ErrorControl=1
+ServiceBinary=%12%\usbser.sys
+
+;------------------------------------------------------------------------------
+;  String Definitions
+;------------------------------------------------------------------------------
+; These strings can be modified to customize your device
+;------------------------------------------------------------------------------
+[Strings]
+MFGFILENAME="acmecdc"
+DRIVERFILENAME ="usbser"
+MFGNAME="Acme"
+DESCRIPTION="USB Serial Port"
+SERVICE="USB to Serial Driver"

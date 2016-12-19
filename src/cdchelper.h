@@ -30,6 +30,7 @@
 
 struct cdc_interface
 {
+  struct interface_association_descriptor cdc_association;
   struct interface_descriptor             ctl_interface;
   struct cdc_functional_descriptor_header cdc_acm_header;
   struct cdc_cm_functional_descriptor     cdc_cm;
@@ -45,6 +46,18 @@ struct cdc_interface
 
 #define CDC_DESCRIPTOR(COMMAND_ITF, DATA_ITF, COMMAND_EP, DATAOUT_EP, DATAIN_EP) \
     { \
+      { \
+        /*Interface Association Descriptor */ \
+        sizeof(struct interface_association_descriptor), /* bLength: Interface Association Descriptor size */ \
+        USB_DESC_TYPE_INTERFACE_ASSOCIATION,             /* bDescriptorType: Interface Association */ \
+        COMMAND_ITF,                                     /* bFirstInterface: First Interface of Association */ \
+        0x02,                                            /* bInterfaceCount: quantity of interfaces in association */ \
+        0x02,                                            /* bFunctionClass: Communication Interface Class */ \
+        0x02,                                            /* bFunctionSubClass: Abstract Control Model */ \
+        0x01,                                            /* bFunctionProtocol: Common AT commands */ \
+        0x00,                                            /* iInterface */ \
+      }, \
+ \
       { \
         /*Interface Descriptor */ \
         sizeof(struct interface_descriptor),             /* bLength: Interface Descriptor size */ \
