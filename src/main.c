@@ -1,80 +1,54 @@
-/**
-  ******************************************************************************
-  * @file    USB_Device/CDC_Standalone/Src/main.c
-  * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    18-June-2014
-  * @brief   USB device CDC demo main file
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  *
-  ******************************************************************************
-  */
+/*
+    DMA-accelerated multi-UART USB CDC for STM32F072 microcontroller
 
-/* Includes ------------------------------------------------------------------*/
+    Copyright (C) 2015,2016 Peter Lawrence
+
+    Permission is hereby granted, free of charge, to any person obtaining a 
+    copy of this software and associated documentation files (the "Software"), 
+    to deal in the Software without restriction, including without limitation 
+    the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+    and/or sell copies of the Software, and to permit persons to whom the 
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in 
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+    DEALINGS IN THE SOFTWARE.
+*/
+
 #include "usbd_desc.h"
-#include "usbd_cdc.h" 
+#include "usbd_composite.h" 
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
 USBD_HandleTypeDef USBD_Device;
 
-/* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
 
-/* Private functions ---------------------------------------------------------*/
-
-/**
-  * @brief  Main program
-  * @param  None
-  * @retval None
-  */
 int main(void)
 {
-  /* STM32F0xx HAL library initialization:
-       - Configure the Flash prefetch, Flash preread and Buffer caches
-       - Systick timer is configured by default as source of time base, but user 
-             can eventually implement his proper time base source (a general purpose 
-             timer for example or other time source), keeping in mind that Time base 
-             duration should be kept 1ms since PPP_TIMEOUT_VALUEs are defined and 
-             handled in milliseconds basis.
-       - Low Level Initialization
-     */
+  /* STM32F0xx HAL library initialization */
   HAL_Init();
   
-  /* Configure the system clock to get correspondent USB clock source */
+  /* configure the system clock to get correspondent USB clock source */
   SystemClock_Config();
   
-  /* Init Device Library */
-  USBD_Init(&USBD_Device, &VCP_Desc, 0);
+  /* Initialize Device Library */
+  USBD_Init(&USBD_Device, &USBD_Desc, 0);
   
-  /* Add Supported Class */
-  USBD_RegisterClass(&USBD_Device, &USBD_CDC);
-  
-  /* Add CDC Interface Class */
-  USBD_CDC_RegisterInterface(&USBD_Device);
-  
+  /* to work within ST's drivers, I've written a special USBD_Composite class that then invokes several classes */
+  USBD_RegisterClass(&USBD_Device, &USBD_Composite);
+
   /* Start Device Process */
   USBD_Start(&USBD_Device);
   
-  while (1)
+  for (;;)
   {
+    __WFI();
   }
 }
 
@@ -122,26 +96,3 @@ static void SystemClock_Config(void)
   /* Start automatic synchronization */ 
   HAL_RCCEx_CRSConfig (&RCC_CRSInitStruct);
 }
-
-#ifdef  USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t* file, uint32_t line)
-{ 
-  __BKPT();
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-
-  /* Infinite loop */
-  while (1)
-  {
-  }
-}
-#endif
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

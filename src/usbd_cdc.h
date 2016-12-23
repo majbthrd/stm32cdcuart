@@ -25,10 +25,10 @@
 #ifndef __USB_CDC_H_
 #define __USB_CDC_H_
 
-#include  "usbd_def.h"
-#include  "usbd_ioreq.h"
-
-#define NUM_OF_CDC_UARTS                    2 /* adjust this to suit the application */
+#include "usbd_def.h"
+#include "usbd_ioreq.h"
+#include "usbd_composite.h"
+#include "config.h"
 
 #define CDC_DATA_OUT_MAX_PACKET_SIZE        USB_FS_MAX_PACKET_SIZE /* don't exceed USB_FS_MAX_PACKET_SIZE; Linux data loss happens otherwise */
 #define CDC_DATA_IN_MAX_PACKET_SIZE         256
@@ -81,10 +81,6 @@ typedef struct
   DMA_HandleTypeDef          hdma_rx;
 } USBD_CDC_HandleTypeDef;
 
-/* array of callback functions invoked by USBD_RegisterClass() in main.c */
-extern const USBD_ClassTypeDef USBD_CDC;
+extern const USBD_CompClassTypeDef USBD_CDC;
 
-uint8_t USBD_CDC_RegisterInterface(USBD_HandleTypeDef *pdev);
-void USBD_CDC_PMAConfig(PCD_HandleTypeDef *hpcd, uint32_t *pma_address);
-  
 #endif  // __USB_CDC_H_

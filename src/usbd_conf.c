@@ -236,7 +236,7 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   HAL_PCDEx_PMAConfig(pdev->pData, 0x80, PCD_SNG_BUF, pma_address =+ USB_MAX_EP0_SIZE);
 
   /* PMA allocation for other endpoints */
-  USBD_CDC_PMAConfig(pdev->pData, &pma_address);
+  USBD_Composite_PMAConfig(pdev->pData, &pma_address);
 
   return USBD_OK;
 }

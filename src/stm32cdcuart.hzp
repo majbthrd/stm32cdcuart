@@ -67,6 +67,7 @@
       <file file_name="stm32f0xx_hal_uart_ex.c" />
       <file file_name="stm32f0xx_hal_msp.c" />
       <file file_name="stm32f0xx_hal_dma.c" />
+      <file file_name="usbd_composite.c" />
     </folder>
     <folder Name="System Files">
       <file file_name="$(StudioDir)/source/thumb_crt0.s" />

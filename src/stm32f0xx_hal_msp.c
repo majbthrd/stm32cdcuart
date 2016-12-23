@@ -100,14 +100,20 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
     GPIO_InitStruct.Speed     = GPIO_SPEED_HIGH;
 
     /* UART TX GPIO pin configuration  */
-    GPIO_InitStruct.Pin       = UARTconfig[index].pin_tx;
-    GPIO_InitStruct.Alternate = UARTconfig[index].af_tx;
-    HAL_GPIO_Init(UARTconfig[index].gpio_tx, &GPIO_InitStruct);
+    if (UARTconfig[index].gpio_tx)
+    {
+      GPIO_InitStruct.Pin       = UARTconfig[index].pin_tx;
+      GPIO_InitStruct.Alternate = UARTconfig[index].af_tx;
+      HAL_GPIO_Init(UARTconfig[index].gpio_tx, &GPIO_InitStruct);
+    }
 
     /* UART RX GPIO pin configuration  */
-    GPIO_InitStruct.Pin       = UARTconfig[index].pin_rx;
-    GPIO_InitStruct.Alternate = UARTconfig[index].af_rx;
-    HAL_GPIO_Init(UARTconfig[index].gpio_rx, &GPIO_InitStruct);
+    if (UARTconfig[index].gpio_rx)
+    {
+      GPIO_InitStruct.Pin       = UARTconfig[index].pin_rx;
+      GPIO_InitStruct.Alternate = UARTconfig[index].af_rx;
+      HAL_GPIO_Init(UARTconfig[index].gpio_rx, &GPIO_InitStruct);
+    }
 
     huart->hdmatx->Instance                 = UARTconfig[index].tx_channel;
     huart->hdmatx->Init.Direction           = DMA_MEMORY_TO_PERIPH;
@@ -148,7 +154,9 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
 
     UARTconfig[index].release_usart();
 
-    HAL_GPIO_DeInit(UARTconfig[index].gpio_tx, UARTconfig[index].pin_tx);
-    HAL_GPIO_DeInit(UARTconfig[index].gpio_rx, UARTconfig[index].pin_rx);
+    if (UARTconfig[index].gpio_tx)
+      HAL_GPIO_DeInit(UARTconfig[index].gpio_tx, UARTconfig[index].pin_tx);
+    if (UARTconfig[index].gpio_rx)
+      HAL_GPIO_DeInit(UARTconfig[index].gpio_rx, UARTconfig[index].pin_rx);
   }
 }

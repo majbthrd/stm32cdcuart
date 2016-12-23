@@ -11,7 +11,7 @@ Improvements over the ST-provided example code are:
 *	Fixed-value variables are declared as const wherever possible to reduce RAM usage.
 *	USB descriptors are written as more-maintainable structs.
 
-Testing was done with a Linux host.
+Testing was done with Linux, Windows 7, and Windows 10 hosts.
 
 ## Requirements
 
@@ -23,7 +23,7 @@ The STM32F072B Discovery Kit precludes the use of UART2, as the available pins f
 
 The only available pins in the device used in STM32F072B Discovery Kit for UART4 share de-bouncing circuitry that artificially restricts the maximum data rate.
 
-USBD\_MAX\_NUM\_INTERFACES in usbd\_conf.h must conform to the NUM\_OF\_CDC\_UARTS value in usbd\_cdc.h (nominally 2x NUM\_OF\_CDC\_UARTS since each CDC has a Command and Data interface).
+config.h has a NUM\_OF\_CDC\_UARTS value that is used throughout the code to control the number of CDC UARTs.
 
 The Command and Data Interface numbers in the USB descriptor in usbd\_desc.c must be continguous and start from zero.
 

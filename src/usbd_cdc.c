@@ -24,6 +24,8 @@
 
 #include "usbd_cdc.h"
 #include "usbd_desc.h"
+#include "usbd_composite.h"
+#include "config.h"
 
 /* USB handle declared in main.c */
 extern USBD_HandleTypeDef USBD_Device;
@@ -36,8 +38,8 @@ static uint8_t USBD_CDC_Setup (USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *r
 static uint8_t USBD_CDC_DataIn (USBD_HandleTypeDef *pdev, uint8_t epnum);
 static uint8_t USBD_CDC_DataOut (USBD_HandleTypeDef *pdev, uint8_t epnum);
 static uint8_t USBD_CDC_EP0_RxReady (USBD_HandleTypeDef *pdev);
-static const uint8_t *USBD_CDC_GetFSCfgDesc (uint16_t *length);
-static uint8_t USBD_CDC_SOF (USBD_HandleTypeDef *pdev);
+static uint8_t USBD_CDC_SOF (struct _USBD_HandleTypeDef *pdev);
+static void USBD_CDC_PMAConfig(PCD_HandleTypeDef *hpcd, uint32_t *pma_address);
 
 static USBD_StatusTypeDef USBD_CDC_ReceivePacket (USBD_HandleTypeDef *pdev, unsigned index);
 static USBD_StatusTypeDef USBD_CDC_TransmitPacket (USBD_HandleTypeDef *pdev, unsigned index, uint16_t offset, uint16_t length);
@@ -47,7 +49,7 @@ static void Error_Handler (void);
 static void ComPort_Config (USBD_CDC_HandleTypeDef *hcdc, unsigned reconfig);
 
 /* CDC interface class callbacks structure that is used by main.c */
-const USBD_ClassTypeDef USBD_CDC = 
+const USBD_CompClassTypeDef USBD_CDC = 
 {
   .Init                  = USBD_CDC_Init,
   .DeInit                = USBD_CDC_DeInit,
@@ -57,9 +59,7 @@ const USBD_ClassTypeDef USBD_CDC =
   .DataIn                = USBD_CDC_DataIn,
   .DataOut               = USBD_CDC_DataOut,
   .SOF                   = USBD_CDC_SOF,
-  .IsoINIncomplete       = NULL,
-  .IsoOUTIncomplete      = NULL,     
-  .GetFSConfigDescriptor = USBD_CDC_GetFSCfgDesc,    
+  .PMAConfig             = USBD_CDC_PMAConfig,
 };
 
 /*
@@ -155,11 +155,12 @@ static uint8_t USBD_CDC_DeInit (USBD_HandleTypeDef *pdev, uint8_t cfgidx)
     USBD_LL_CloseEP(pdev, parameters[index].command_ep);
 
     /* DeInitialize the UART peripheral */
-    if(HAL_UART_DeInit(&hcdc->UartHandle) != HAL_OK)
-    {
-      /* Initialization Error */
-      Error_Handler();
-    }
+    if (hcdc->UartHandle.Instance)
+      if(HAL_UART_DeInit(&hcdc->UartHandle) != HAL_OK)
+      {
+        /* Initialization Error */
+        Error_Handler();
+      }
   }
   
   return USBD_OK;
@@ -249,7 +250,7 @@ static uint8_t USBD_CDC_DataOut (USBD_HandleTypeDef *pdev, uint8_t epnum)
   return USBD_OK;
 }
 
-static uint8_t USBD_CDC_SOF (USBD_HandleTypeDef *pdev)
+static uint8_t USBD_CDC_SOF (struct _USBD_HandleTypeDef *pdev)
 {
   uint32_t buffsize, write_index;
   USBD_CDC_HandleTypeDef *hcdc = context;
@@ -313,17 +314,6 @@ static uint8_t USBD_CDC_EP0_RxReady (USBD_HandleTypeDef *pdev)
     break;
   }
 
-  return USBD_OK;
-}
-
-static const uint8_t *USBD_CDC_GetFSCfgDesc (uint16_t *length)
-{
-  *length = USBD_CfgFSDesc_len;
-  return USBD_CfgFSDesc_pnt;
-}
-
-uint8_t USBD_CDC_RegisterInterface  (USBD_HandleTypeDef   *pdev)
-{
   return USBD_OK;
 }
 
@@ -523,16 +513,19 @@ static void Error_Handler(void)
   __BKPT();
 }
 
-void USBD_CDC_PMAConfig(PCD_HandleTypeDef *hpcd, uint32_t *pma_address)
+static void USBD_CDC_PMAConfig(PCD_HandleTypeDef *hpcd, uint32_t *pma_address)
 {
   unsigned index;
 
   /* allocate PMA memory for all endpoints associated with CDC */
   for (index = 0; index < NUM_OF_CDC_UARTS; index++)
   {
-    HAL_PCDEx_PMAConfig(hpcd, parameters[index].data_in_ep,  PCD_SNG_BUF, *pma_address =+ CDC_DATA_IN_MAX_PACKET_SIZE);
-    HAL_PCDEx_PMAConfig(hpcd, parameters[index].data_out_ep, PCD_SNG_BUF, *pma_address =+ CDC_DATA_OUT_MAX_PACKET_SIZE);
-    HAL_PCDEx_PMAConfig(hpcd, parameters[index].command_ep,  PCD_SNG_BUF, *pma_address =+ CDC_CMD_PACKET_SIZE);
+    HAL_PCDEx_PMAConfig(hpcd, parameters[index].data_in_ep,  PCD_SNG_BUF, *pma_address);
+    *pma_address += CDC_DATA_IN_MAX_PACKET_SIZE;
+    HAL_PCDEx_PMAConfig(hpcd, parameters[index].data_out_ep, PCD_SNG_BUF, *pma_address);
+    *pma_address += CDC_DATA_OUT_MAX_PACKET_SIZE;
+    HAL_PCDEx_PMAConfig(hpcd, parameters[index].command_ep,  PCD_SNG_BUF, *pma_address);
+    *pma_address += CDC_CMD_PACKET_SIZE;
   }
 }
 

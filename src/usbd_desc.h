@@ -8,7 +8,7 @@
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-extern const USBD_DescriptorsTypeDef VCP_Desc;
+extern const USBD_DescriptorsTypeDef USBD_Desc;
 extern const uint8_t *USBD_CfgFSDesc_pnt;
 extern const uint16_t USBD_CfgFSDesc_len;
 
