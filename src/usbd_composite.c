@@ -70,7 +70,7 @@ one of ST Micro's legacy code's single class drivers, but then invokes all compo
 
 static const struct composite_list_struct composite_list[] =
 {
-  &USBD_CDC, /* in this particular code, there is only CDC */
+  { &USBD_CDC }, /* in this particular code, there is only CDC */
 };
 
 static uint8_t USBD_Composite_Init (USBD_HandleTypeDef *pdev, uint8_t cfgidx)
