@@ -31,6 +31,13 @@ static void SystemClock_Config(void);
 
 int main(void)
 {
+  /*
+  With code compiled outside Rowley, I'm seeing the USB ISR fire between USBD_Init() and USBD_RegisterClass().
+  Interrupts are enabled at reset, and ST's (mis)decision is to start enabling NVIC interrupts in USBD_Init().
+  By disabling interrupts here, and enabling later when everything is ready, we avoid this race condition.
+  */
+  __disable_irq();
+
   /* STM32F0xx HAL library initialization */
   HAL_Init();
   
@@ -45,6 +52,9 @@ int main(void)
 
   /* Start Device Process */
   USBD_Start(&USBD_Device);
+
+  /* OK, only *now* it is OK for the USB interrupts to fire */
+  __enable_irq();
   
   for (;;)
   {
