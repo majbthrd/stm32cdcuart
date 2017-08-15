@@ -1,0 +1,7 @@
+syntax: glob
+src/*.bak
+src/stm32cdcuart THUMB Debug/*
+src/stm32cdcuart THUMB Release/*
+src/*.hzs
+src/build/*
+
