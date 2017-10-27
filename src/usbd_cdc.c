@@ -46,7 +46,7 @@ static USBD_StatusTypeDef USBD_CDC_TransmitPacket (USBD_HandleTypeDef *pdev, uns
 
 static int8_t CDC_Itf_Control (USBD_CDC_HandleTypeDef *hcdc, uint8_t cmd, uint8_t* pbuf, uint16_t length);
 static void Error_Handler (void);
-static void ComPort_Config (USBD_CDC_HandleTypeDef *hcdc, unsigned reconfig);
+static void ComPort_Config (USBD_CDC_HandleTypeDef *hcdc);
 
 /* CDC interface class callbacks structure that is used by main.c */
 const USBD_CompClassTypeDef USBD_CDC = 
@@ -129,7 +129,7 @@ static uint8_t USBD_CDC_Init (USBD_HandleTypeDef *pdev, uint8_t cfgidx)
     hcdc->LineCoding = defaultLineCoding;
     __HAL_LINKDMA(&hcdc->UartHandle, hdmatx, hcdc->hdma_tx);
     __HAL_LINKDMA(&hcdc->UartHandle, hdmarx, hcdc->hdma_rx);
-    ComPort_Config(hcdc, 0);
+    ComPort_Config(hcdc);
      
     /* Prepare Out endpoint to receive next packet */
     USBD_CDC_ReceivePacket(pdev, index);
@@ -378,7 +378,7 @@ static int8_t CDC_Itf_Control (USBD_CDC_HandleTypeDef *hcdc, uint8_t cmd, uint8_
     hcdc->LineCoding.datatype   = pbuf[6];
     
     /* Set the new configuration */
-    ComPort_Config(hcdc, 1);
+    ComPort_Config(hcdc);
     break;
 
   case CDC_GET_LINE_CODING:
@@ -425,9 +425,9 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   }
 }
 
-static void ComPort_Config(USBD_CDC_HandleTypeDef *hcdc, unsigned reconfig)
+static void ComPort_Config(USBD_CDC_HandleTypeDef *hcdc)
 {
-  if (reconfig)
+  if (hcdc->UartHandle.State != HAL_UART_STATE_RESET)
     if (HAL_UART_DeInit(&hcdc->UartHandle) != HAL_OK)
     {
       /* Initialization Error */
