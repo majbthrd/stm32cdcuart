@@ -116,7 +116,7 @@ __ALIGN_BEGIN static const struct configuration_1 USBD_Composite_CfgFSDesc __ALI
 };
 
 /* pointer and length of configuration descriptor for main USB driver */
-const uint8_t *USBD_CfgFSDesc_pnt = (const uint8_t *)&USBD_Composite_CfgFSDesc;
+const uint8_t *const USBD_CfgFSDesc_pnt = (const uint8_t *)&USBD_Composite_CfgFSDesc;
 const uint16_t USBD_CfgFSDesc_len = sizeof(USBD_Composite_CfgFSDesc);
 
 /* USB Standard Device Descriptor */
