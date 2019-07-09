@@ -47,6 +47,7 @@ static USBD_StatusTypeDef USBD_CDC_TransmitPacket (USBD_HandleTypeDef *pdev, uns
 static int8_t CDC_Itf_Control (USBD_CDC_HandleTypeDef *hcdc, uint8_t cmd, uint8_t* pbuf, uint16_t length);
 static void Error_Handler (void);
 static void ComPort_Config (USBD_CDC_HandleTypeDef *hcdc);
+static void ComPort_Anneal (USBD_CDC_HandleTypeDef *hcdc);
 
 /* CDC interface class callbacks structure that is used by main.c */
 const USBD_CompClassTypeDef USBD_CDC = 
@@ -122,17 +123,12 @@ static uint8_t USBD_CDC_Init (USBD_HandleTypeDef *pdev, uint8_t cfgidx)
     USBD_LL_OpenEP(pdev, parameters[index].command_ep, USBD_EP_TYPE_INTR, CDC_CMD_PACKET_SIZE);
   
     /* Configure the UART peripheral */
-    hcdc->InboundBufferReadIndex = 0;
-    hcdc->InboundTransferInProgress = 0;
-    hcdc->OutboundTransferNeedsRenewal = 0;
     hcdc->UartHandle.Instance = parameters[index].Instance;
     hcdc->LineCoding = defaultLineCoding;
     __HAL_LINKDMA(&hcdc->UartHandle, hdmatx, hcdc->hdma_tx);
     __HAL_LINKDMA(&hcdc->UartHandle, hdmarx, hcdc->hdma_rx);
+    ComPort_Anneal(hcdc);
     ComPort_Config(hcdc);
-     
-    /* Prepare Out endpoint to receive next packet */
-    USBD_CDC_ReceivePacket(pdev, index);
   }
 
   return USBD_OK;
@@ -394,6 +390,15 @@ static int8_t CDC_Itf_Control (USBD_CDC_HandleTypeDef *hcdc, uint8_t cmd, uint8_
     break;
 
   case CDC_SET_CONTROL_LINE_STATE:
+
+    /*
+    This feels inelegant, but I lack a better alternative.
+    PC drivers seem to assume IN/OUT endpoints have been reset whenever a COM port is opened.
+    However, there is no open/close message in the CDC specification.
+    This message seems to be associated with such an event, so it is being (mis)used as if it were.
+    */
+    ComPort_Anneal(hcdc);
+
     /* Add your code here */
     break;
 
@@ -500,6 +505,18 @@ static void ComPort_Config(USBD_CDC_HandleTypeDef *hcdc)
 
   /* Start reception */
   HAL_UART_Receive_DMA(&hcdc->UartHandle, (uint8_t *)(hcdc->InboundBuffer), INBOUND_BUFFER_SIZE);
+}
+
+static void ComPort_Anneal(USBD_CDC_HandleTypeDef *hcdc)
+{
+  uint32_t current_pos = hcdc->hdma_rx.Instance->CNDTR;
+
+  /* init InboundBufferReadIndex to the DMA's current position (skipping over any previously received data) */
+  hcdc->InboundBufferReadIndex = (current_pos < INBOUND_BUFFER_SIZE) ? (INBOUND_BUFFER_SIZE - current_pos) : 0;
+
+  /* the PC driver may not ACK all IN/OUT packets when closing the port, so it behooves us to re-init these */
+  hcdc->InboundTransferInProgress = 0;
+  hcdc->OutboundTransferNeedsRenewal = 1;
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
